@@ -5,7 +5,7 @@ FROM python:3.9
 WORKDIR /app
 
 # Copy the application code to the container
-COPY primary /app
+COPY load_balancer /app
 
 # Install any required dependencies using pip
 RUN pip install --no-cache-dir -r requirements.txt

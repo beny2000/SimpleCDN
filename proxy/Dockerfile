@@ -5,13 +5,13 @@ FROM python:3.9
 WORKDIR /app
 
 # Copy the requirements file into the container and install dependencies
-COPY backup/requirements.txt ./
+COPY proxy/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the server code, proto file into the container
-COPY backup/app.py ./
+COPY proxy/app.py ./
 COPY proto/ops.proto ./proto/
-COPY backup/cache ./cache/
+COPY proxy/cache ./cache/
 
 # Generate the gRPC stub code from the proto file
 RUN python -m grpc_tools.protoc --proto_path=./proto --python_out=. --grpc_python_out=. ops.proto

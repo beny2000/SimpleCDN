@@ -5,8 +5,10 @@ service FileServer {
   rpc get(Request) returns (stream Chunk) {}
 }
 
+
 message Chunk {
   bytes buffer = 1;
+  string name = 2;
 }
 
 message Request {

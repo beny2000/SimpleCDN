@@ -10,24 +10,31 @@ CHUNK_SIZE = 1024 * 1024  # 1MB
 class OriginServer(ops_pb2_grpc.FileServerServicer):
 
       def __init__(self):
-         self.origin_files = './files/'
+         self.origin_files = 'files/'
       
-      def save_chunks_to_file(self, chunks, filename):
+      def save_chunks_to_file(self, chunks):
+         chunks_iter = [chunk for chunk in chunks]
+         filename = chunks_iter[0].name
          with open(self.origin_files + filename, 'wb') as f:
-            for chunk in chunks:
+            for chunk in chunks_iter:
                   f.write(chunk.buffer)
+
+         return self.origin_files + filename
       
       def get_file_chunks(self, filename):
-         with open(self.origin_files + filename, 'rb') as f:
-            while True:
-               piece = f.read(CHUNK_SIZE)
-               if len(piece) == 0:
-                     return
-               yield ops_pb2.Chunk(buffer=piece)
+         try:
+            with open(self.origin_files + filename, 'rb') as f:
+               while True:
+                  piece = f.read(CHUNK_SIZE)
+                  if len(piece) == 0:
+                        return
+                  yield ops_pb2.Chunk(buffer=piece, name=filename)
+         except Exception as e:
+             print("Error: ", self.origin_files + filename, str(e))
 
       def put(self, request_iterator, context):
-         self.save_chunks_to_file(request_iterator, self.origin_files)
-         return ops_pb2.Reply(length=os.path.getsize(self.origin_files))
+         location = self.save_chunks_to_file(request_iterator)
+         return ops_pb2.Reply(length=os.path.getsize(location))
 
       def get(self, request, context):
          print("GET")

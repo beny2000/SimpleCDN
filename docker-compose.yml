@@ -9,26 +9,26 @@ services:
       PORT: 8001
     ports:
       - "8001:8001"
-  primary:
+  load_balancer:
     build:
       context: .
-      dockerfile: primary/Dockerfile
+      dockerfile: load_balancer/Dockerfile
     environment:
         PORT: 8000
     ports:
       - "8000:8000"
-  backup1:
+  proxy1:
     build:
       context: .
-      dockerfile: backup/Dockerfile
+      dockerfile: proxy/Dockerfile
     environment:
         PORT: 5000
     ports:
       - "5000:5000"
-  backup2:
+  proxy2:
     build:
       context: .
-      dockerfile: backup/Dockerfile
+      dockerfile: proxy/Dockerfile
     environment:
         PORT: 5001
     ports:
