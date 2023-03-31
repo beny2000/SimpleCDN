@@ -13,6 +13,7 @@ message Chunk {
 
 message Request {
   string name = 1;
+  int32 area = 2;
 }
 
 message Reply {

@@ -1,36 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>My Blog</title>
+    <meta charset="UTF-8">
+    <title>Simple Primary Backup CDN Project</title>
 </head>
 <body>
-  <header>
-    <h1>My Blog</h1>
-    <nav>
-      <ul>
-        <li><a href="#">Home</a></li>
-        <li><a href="#">About</a></li>
-        <li><a href="#">Contact</a></li>
-      </ul>
-    </nav>
-  </header>
-  <main>
-    <article>
-      <h2>My First Blog Post</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis at quam a est iaculis bibendum. Sed ultrices interdum sapien quis sagittis. Nulla quis viverra urna. Nunc semper lacus sit amet massa commodo euismod. Integer eleifend tortor id ligula ultricies, eu molestie metus tempus. </p>
-      <p>Donec pharetra finibus augue a dignissim. Nulla volutpat massa vitae ipsum tincidunt, at eleifend justo sollicitudin. Duis eu velit eget mi ultricies blandit. Nam volutpat justo ac mi consectetur, at rhoncus lectus venenatis. Duis vel nunc a risus tempor consequat. Fusce auctor urna quis nulla dictum, id tristique eros pulvinar. </p>
-      <p>Integer vitae rutrum sapien, eu suscipit augue. Sed ut justo ac lorem ultrices vulputate. Fusce non imperdiet nibh, in pellentesque elit. Etiam vel augue dolor. Suspendisse potenti. Morbi consequat consequat purus sed tempus. Nulla dapibus arcu sed odio volutpat egestas. </p>
-    </article>
-    <article>
-      <h2>My Second Blog Post</h2>
-      <p>Praesent vel convallis risus, sed laoreet elit. Donec tincidunt metus auctor, elementum enim sed, pellentesque odio. Etiam interdum nisi at nunc accumsan, id ultrices est cursus. Suspendisse lacinia, tellus vitae pulvinar tincidunt, nisi ex imperdiet lectus, ut rhoncus risus turpis vitae purus. Aliquam erat volutpat. </p>
-      <p>Proin ut venenatis turpis. In eget felis risus. Vestibulum ac elit vel eros sagittis facilisis at vel nulla. Nulla vel quam quis tellus aliquam elementum. Praesent iaculis faucibus enim, eget tristique lorem sodales at. Pellentesque sit amet tincidunt leo. Suspendisse eu turpis a nisi accumsan dictum. </p>
-      <p>Mauris interdum a sapien eu laoreet. Nunc euismod mauris id velit tempor malesuada. Donec vestibulum, massa quis bibendum suscipit, arcu metus pharetra ipsum, sed semper est enim quis tellus. Donec tristique dolor nibh, vel tempor velit imperdiet nec. Praesent euismod nisl eget ante scelerisque, vel bibendum sapien consequat. </p>
-    </article>
-  </main>
-  <footer>
-    <p>&copy; 2023 My Blog</p>
-  </footer>
+    <h1>Simple Primary Backup CDN Project</h1>
+    <p>
+      The Simple Primary Backup CDN project is a web server that can be used to host any kinds of files. 
+      It implements a primary backup model and consists of a load balancer, a proxy server, and an origin server.
+    </p>
+
+    <h2>Running the project</h2>
+    <ol>
+        <li>Install <a href="https://docs.docker.com/get-docker/">Docker</a></li>
+        <li>Run <code>docker compose up -d</code></li>
+        <li>Go to <a href="http://localhost:8000/test_file.html">http://localhost:8000/test_file.html</a></li>
+        <li>Upload files to origin with <code>python UI/UI.py</code></li>
+        <li>Stop servers with <code>docker compose down --rmi all</code></li>
+    </ol>
+
+    <h2>Components of the project</h2>
+    <h3>Load Balancer</h3>
+    <p>The load balancer acts as a load balancer that redirects incoming requests to a proxy server. It redirects requests to a proxy server that is "close" to the requesting client/user. It should be an HTTP server that redirects requests to a proxy and must know the locations (ports) of proxy servers.</p>
+
+    <h3>Proxy Server</h3>
+    <p>The proxy server acts as a proxy cache for the origin server. If the proxy has stored the requested file, then it serves the stored file. Otherwise, it calls the origin server to serve the requested file. It should be an HTTP server that either serves the file or maps the request to the gRPC get method. It must know the location (port) of the origin server.</p>
+
+    <h3>Origin Server</h3>
+    <p>The origin server stores the original file and returns the original file when requested by a proxy. It should be a gRPC server.</p>
+    
+    <h3>System Diagram</h3>
+    <img src="cdn_diagram.png" alt="architecture diagram">
+
+    <h3>Extra Features</h3>
+    <ul>
+        <li>UI for uploading files to the origin server</li>
+        <li>Failure handling and fault tolerance for load_balancer, proxy and origin servers</li>
+    </ul>
 </body>
 </html>

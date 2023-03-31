@@ -1,37 +1,51 @@
 version: '3'
 
 services:
+
   origin:
     build:
       context: .
       dockerfile: origin/Dockerfile
     environment:
-      PORT: 8001
+      PORT: ${ORIGIN_PORT}
+      STORAGE_DIR: "files/"
     ports:
-      - "8001:8001"
+      - "${ORIGIN_PORT}:${ORIGIN_PORT}"
+
   load_balancer:
     build:
       context: .
       dockerfile: load_balancer/Dockerfile
     environment:
-        PORT: 8000
+        PORT: ${BALANCER_PORT}
+        PROXIES: ${PROXY1_PORT},${PROXY2_PORT}
+        DEFAULT_PATH: "test_file.html"
+        FLASK_APP: "server.py"
     ports:
-      - "8000:8000"
+      - "${BALANCER_PORT}:${BALANCER_PORT}"
+
   proxy1:
     build:
       context: .
       dockerfile: proxy/Dockerfile
     environment:
-        PORT: 5000
+        PORT: ${PROXY1_PORT}
+        ORIGIN_PORT: ${ORIGIN_PORT}
+        FLASK_APP: "server.py"
+        CACHE_DIR: "cache/"
     ports:
-      - "5000:5000"
+      - "${PROXY1_PORT}:${PROXY1_PORT}"
+
   proxy2:
     build:
       context: .
       dockerfile: proxy/Dockerfile
     environment:
-        PORT: 5001
+        PORT: ${PROXY2_PORT}
+        ORIGIN_PORT: ${ORIGIN_PORT}
+        FLASK_APP: "server.py"
+        CACHE_DIR: "cache/"
     ports:
-      - "5001:5001"
+      - "${PROXY2_PORT}:${PROXY2_PORT}"
   
-
+# copy proxy service definition to start more proxy server
