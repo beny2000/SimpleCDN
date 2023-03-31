@@ -3,10 +3,13 @@ FROM python:3.9
 
 # Set the working directory to /app
 WORKDIR /app
+ARG CACHE_DIR
 
 # Copy the application code to the container
 COPY proxy /app
 COPY proto/ops.proto ./proto/
+RUN mkdir $CACHE_DIR
+
 
 # Install required dependencies
 RUN pip install --no-cache-dir -r requirements.txt

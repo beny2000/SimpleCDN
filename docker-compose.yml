@@ -28,6 +28,8 @@ services:
     build:
       context: .
       dockerfile: proxy/Dockerfile
+      args:
+        CACHE_DIR: "cache/"
     environment:
         PORT: ${PROXY1_PORT}
         ORIGIN_PORT: ${ORIGIN_PORT}
@@ -40,6 +42,8 @@ services:
     build:
       context: .
       dockerfile: proxy/Dockerfile
+      args:
+        CACHE_DIR: "cache/"
     environment:
         PORT: ${PROXY2_PORT}
         ORIGIN_PORT: ${ORIGIN_PORT}
@@ -48,4 +52,4 @@ services:
     ports:
       - "${PROXY2_PORT}:${PROXY2_PORT}"
   
-# copy proxy service definition to start more proxy server
+#copy proxy service definition to start more proxy server
