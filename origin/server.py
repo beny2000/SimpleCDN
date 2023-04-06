@@ -7,6 +7,7 @@ import ops_pb2
 import ops_pb2_grpc
 
 PORT = os.environ.get('PORT', 8001)
+BACKUP_PORT = os.environ.get('BACKUP_PORT', 8002)
 STORAGE_DIR = os.environ.get('STORAGE_DIR', 'files/')
 CHUNK_SIZE = 1024 * 1024  # 1MB
 logging.basicConfig(level=logging.DEBUG,
@@ -64,6 +65,10 @@ class OriginServer(ops_pb2_grpc.FileServerServicer):
          :return: The size of the file that was saved.
          """
          filename = self._save_chunks_to_file(request_iterator)
+         # Send the file to the backup server
+         with grpc.insecure_channel(f'localhost:{BACKUP_PORT}') as channel:
+             stub = ops_pb2_grpc.FileServerStub(channel)
+             stub.put(self._get_file_chunks(filename))
 
          logging.info(f"Stored file {filename}")
          return ops_pb2.Reply(length=os.path.getsize(self.origin_files + filename))
@@ -79,13 +84,15 @@ class OriginServer(ops_pb2_grpc.FileServerServicer):
          if request.name:
             logging.info(f"Served file {request.name}")
             return self._get_file_chunks(request.name)
-      
+
+def run_origin_server():
+  server = grpc.server(futures.ThreadPoolExecutor(max_workers=5))
+  ops_pb2_grpc.add_FileServerServicer_to_server(OriginServer(), server)
+  server.add_insecure_port(f'[::]:{PORT}')
+
+  logging.info(f"Origin Server start on port {PORT}")
+  server.start()
+  server.wait_for_termination()
 
 if __name__ == "__main__":
-   server = grpc.server(futures.ThreadPoolExecutor(max_workers=5))
-   ops_pb2_grpc.add_FileServerServicer_to_server(OriginServer(), server)
-   server.add_insecure_port(f'[::]:{PORT}')
-
-   logging.info(f"Proxy Server start on port {PORT}")
-   server.start()
-   server.wait_for_termination()
+    run_origin_server()
