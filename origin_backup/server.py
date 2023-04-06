@@ -6,7 +6,7 @@ from concurrent import futures
 import ops_pb2
 import ops_pb2_grpc
 
-BACKUP_PORT = os.environ.get('BACKUP_PORT', 8002)
+BACKUP_PORT = os.environ.get('PORT')
 BACKUP_STORAGE_DIR = os.environ.get('STORAGE_DIR', 'files/')
 CHUNK_SIZE = 1024 * 1024  # 1MB
 logging.basicConfig(level=logging.DEBUG,

@@ -8,6 +8,7 @@ services:
       dockerfile: origin/Dockerfile
     environment:
       PORT: ${ORIGIN_PORT}
+      BACKUP_PORTS: ${BACKUP1_PORT},${BACKUP2_PORT}
       STORAGE_DIR: "files/"
     ports:
       - "${ORIGIN_PORT}:${ORIGIN_PORT}"
@@ -17,10 +18,20 @@ services:
       context: .
       dockerfile: origin_backup/Dockerfile
     environment:
-      PORT: ${BACKUP_PORT}
+      PORT: ${BACKUP1_PORT}
       STORAGE_DIR: "files/"
     ports:
-      - "${BACKUP_PORT}:${BACKUP_PORT}"
+      - "${BACKUP1_PORT}:${BACKUP1_PORT}"
+
+  origin_backup2:
+    build:
+      context: .
+      dockerfile: origin_backup/Dockerfile
+    environment:
+      PORT: ${BACKUP2_PORT}
+      STORAGE_DIR: "files/"
+    ports:
+      - "${BACKUP2_PORT}:${BACKUP2_PORT}"
 
   load_balancer:
     build:
