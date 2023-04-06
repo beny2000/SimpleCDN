@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Primary Backup CDN Project</title>
+</head>
+<body>
+    <h1>Simple Primary Backup CDN Project</h1>
+    <p>
+      The Simple Primary Backup CDN project is a web server that can be used to host any kinds of files. 
+      It implements a primary backup model and consists of a load balancer, a proxy server, and an origin server.
+    </p>
+
+    <h2>Running the project</h2>
+    <ol>
+        <li>Install <a href="https://docs.docker.com/get-docker/">Docker</a></li>
+        <li>Run <code>docker compose up -d</code></li>
+        <li>Go to <a href="http://localhost:8000/test_file.html">http://localhost:8000/test_file.html</a></li>
+        <li>Upload files to origin with <code>python UI/UI.py</code></li>
+        <li>Stop servers with <code>docker compose down --rmi all</code></li>
+    </ol>
+
+    <h2>Components of the project</h2>
+    <h3>Load Balancer</h3>
+    <p>The load balancer acts as a load balancer that redirects incoming requests to a proxy server. It redirects requests to a proxy server that is "close" to the requesting client/user. It should be an HTTP server that redirects requests to a proxy and must know the locations (ports) of proxy servers.</p>
+
+    <h3>Proxy Server</h3>
+    <p>The proxy server acts as a proxy cache for the origin server. If the proxy has stored the requested file, then it serves the stored file. Otherwise, it calls the origin server to serve the requested file. It should be an HTTP server that either serves the file or maps the request to the gRPC get method. It must know the location (port) of the origin server.</p>
+
+    <h3>Origin Server</h3>
+    <p>The origin server stores the original file and returns the original file when requested by a proxy. It should be a gRPC server.</p>
+    
+    <h3>System Diagram</h3>
+    <img src="cdn_diagram.png" alt="architecture diagram">
+
+    <h3>Extra Features</h3>
+    <ul>
+        <li>UI for uploading files to the origin server</li>
+        <li>Failure handling and fault tolerance for load_balancer, proxy and origin servers</li>
+    </ul>
+</body>
+</html>

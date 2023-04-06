@@ -12,6 +12,16 @@ services:
     ports:
       - "${ORIGIN_PORT}:${ORIGIN_PORT}"
 
+  backup:
+    build:
+      context: .
+      dockerfile: origin_backup/Dockerfile
+    environment:
+      PORT: ${BACKUP_PORT}
+      STORAGE_DIR: "files/"
+    ports:
+      - "${BACKUP_PORT}:${BACKUP_PORT}"
+
   load_balancer:
     build:
       context: .
