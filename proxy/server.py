@@ -1,6 +1,7 @@
 import os
 import grpc
 import logging
+from datetime import datetime, timedelta
 from concurrent import futures
 from flask import Flask
 
@@ -11,16 +12,36 @@ CHUNK_SIZE = 1024 * 1024  # 1MB
 PORT = os.environ.get("PORT", 5000)
 ORIGIN_PORT = os.environ.get("ORIGIN_PORT", 8001)
 CACHE_DIR = os.environ.get("CACHE_DIR", "cache/")
+TTL = float(os.environ.get("TTL", 120))
+BASE_LATENCY = float(os.environ.get("BASE_LATENCY", 1))
+IN_SCALE = float(os.environ.get("IN_SCALE", 1))
+OUT_SCALE = float(os.environ.get("OUT_SCALE", 1))
+TIME_FORMAT = '%Y-%m-%d-%H:%M:%S.%f'
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s',
                     handlers=[logging.StreamHandler()])
 
+def introduce_latency(self, request_area_id=None):
+    """
+    Introduces the latency based on the area and request area ID.
+    
+    :param request_area_id: The ID of the area from which the request is being made. It is an optional
+    parameter and if it is not provided, the latency will be calculated based on the current object's
+    area
+    :return: the calculated latency based on the input parameters.
+    """
+    if self.area == request_area_id:
+        latency = BASE_LATENCY * IN_SCALE
+    else:
+        latency = BASE_LATENCY * OUT_SCALE
+
+    return latency
 
 class FileStore:
     def __init__(self, cache_location=CACHE_DIR):
         self.cache = cache_location
 
-    def _get_file_chunks(self, filename):
+    def get_file_chunks(self, filename):
         """
         Reads the file in chunks of size CHUNK_SIZE, and yields each chunk as a Chunk message
         message
@@ -36,7 +57,7 @@ class FileStore:
                 yield ops_pb2.Chunk(buffer=piece)
 
 
-    def _save_chunks_to_file(self, chunks, filename):
+    def save_chunks_to_file(self, chunks, filename):
         """
         It takes a list of chunks and a filename, and writes the chunks to the file
         
@@ -61,6 +82,34 @@ class FileStore:
             return value
         except Exception as e:
             return False
+        
+    def is_expired(self, key):
+        """
+        Checks if a cache key has expired based on its time-to-live (TTL) attribute.
+        
+        :param key: key of the cached item that we want to check for expiration
+        :return: If the cache entry has expired, it returns True, otherwise it returns False.
+        """
+        try:
+            ttl = os.getxattr(self.cache+key, 'user.ttl').decode()
+
+            return datetime.strptime(ttl, TIME_FORMAT) < datetime.now()
+        except Exception as e:
+            return True
+    
+    def set_TTL(self, key):
+        """
+        Sets a time-to-live (TTL) attribute for a given key in a cache using the current time
+        plus a specified TTL value.
+        
+        :param key: key of the cached item that we want to check for expiration
+        """
+        try:
+            timestamp = datetime.now() + timedelta(seconds=TTL)
+            os.setxattr(self.cache+key, 'user.ttl', timestamp.strftime(TIME_FORMAT).encode())
+        except Exception as e:
+            pass
+
 
 class FileClient:
     def __init__(self, address, file_store):
@@ -80,7 +129,7 @@ class FileClient:
         
         :param in_file_name: The name of the file to be uploaded
         """
-        chunks_generator = self.storage._get_file_chunks(in_file_name)
+        chunks_generator = self.storage.get_file_chunks(in_file_name)
         response = self.stub.put(chunks_generator)
 
         assert response.length == os.path.getsize(in_file_name)
@@ -94,12 +143,21 @@ class FileClient:
         :param target_name: The name of the file you want to download
         """
         response = self.stub.get(ops_pb2.Request(name=target_name))
-        self.storage._save_chunks_to_file(response, target_name)
+        self.storage.save_chunks_to_file(response, target_name)
+        self.storage.set_TTL(target_name)
 
     
 app = Flask(__name__)
 file_store = FileStore()
 client = FileClient(f'origin:{ORIGIN_PORT}', file_store) # hostname must be docker service name since the origin server is in the same network
+
+@app.route('/heartbeat')
+def heartbeat():
+    """
+    Responds to heartbeat with 'OK'.
+    :return: 'OK'
+    """
+    return 'OK'
 
 @app.route('/<path:path>')
 def serve_GET(path):
@@ -109,9 +167,11 @@ def serve_GET(path):
     :param path: The path of the file to be served
     :return: The file is being returned
     """
+    
     file = file_store.get(path)
 
-    if file:
+    if file and not file_store.is_expired(path):
+        # Check if TTL has expried
         logging.info(f"Served file {path}. Request was a cache hit")
         return file
     
