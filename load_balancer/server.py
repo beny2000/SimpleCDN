@@ -3,11 +3,12 @@ import json
 import random
 import logging
 import requests
+import itertools
 from shapely.geometry import Point
 from flask import Flask, redirect, request
 
 PORT = os.environ.get("PORT")
-PROXY_PORTS = os.environ.get("PROXIES")
+NUM_AREAS = int(os.environ.get("NUM_AREAS"))
 DEFAULT_PATH = os.environ.get("DEFAULT_PATH")
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s',
@@ -15,65 +16,23 @@ logging.basicConfig(level=logging.DEBUG,
 
 
 app = Flask(__name__)
-servers = {str(i): (f"http://localhost:{port}/", 37.7749, -122.4194)
-           for i, port in enumerate(PROXY_PORTS.split(","))}
-
-
-def get_IP_location(ip_address):
-    """
-    Returns the latitude and longitude of the IP address
-
-    :param ip_address: The IP address to get the location of
-    :return: A tuple of latitude and longitude
-    """
-
-    request_url = 'https://geolocation-db.com/jsonp/' + ip_address
-    response = requests.get(request_url)
-
-    result = response.content.decode()
-    result = result.split("(")[1].strip(")")
-    result = json.loads(result)
-    logging.info(f"Request from: {result}")
-    return result['latitude'], result['longitude']
-
-
-def get_closest_server(ip):
-    """
-    Finds the closest server to that IP address, returns the URL of that
-    server
-
-    :param ip: The IP address of the client
-    :return: The url of the closest server to the client.
-    """
-    client_longitude, client_latitude = get_IP_location(ip)
-    client_location = Point(client_longitude, client_latitude)
-    closest_server = None
-    min_distance = float('inf')
-
-    for server, (url, lat, long) in servers:
-
-        server_location = Point(lat, long)
-        distance = client_location.distance(server_location)
-
-        if distance < min_distance:
-            closest_server = url
-            min_distance = distance
-
-    return closest_server
+areas = [os.environ.get(f"AREA{i}_PROXIES") for i in range(1, NUM_AREAS+1)]
+servers = {str(i+1): itertools.cycle([f"http://localhost:{port}/" for port in area.split(",")]) for i, area in enumerate(areas)}
 
 
 def get_server(req):
     """
-    Returns proxy associated with the query string 'area', if not 'area' specified returns a random server
+    Returns proxy associated with the query string 'area', if not 'area' specified returns a the next server in a random area
 
     :param req: The request object
     :return: A proxy server
     """
     if req.args.get('area'):
-        proxy = servers[req.args.get('area')][0]
+        area_proxies = servers[req.args.get('area')]
+        proxy = next(area_proxies)
     else:
-        # proxy = get_closest_server(req.remote_addr) # enable on public network to geographically select a proxy
-        proxy = random.choice([i[0] for i in servers.values()])
+        area = random.choice([key for key in servers.keys()])
+        proxy = next(servers[area])
 
     logging.info(f'Routing request to {proxy}')
     return proxy

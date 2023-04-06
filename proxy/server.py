@@ -175,7 +175,7 @@ def serve_GET(path):
         logging.info(f"Served file {path}. Request was a cache hit")
         return file
     
-    client.download(path)
+    client.download(path) # if this fails to hit the primary origin then try a backup origin
     logging.info(f"Served file {path}. Request was a cache miss")
     return file_store.get(path)
 
