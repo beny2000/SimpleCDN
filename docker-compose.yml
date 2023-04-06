@@ -12,7 +12,7 @@ services:
     ports:
       - "${ORIGIN_PORT}:${ORIGIN_PORT}"
 
-  backup:
+  origin_backup1:
     build:
       context: .
       dockerfile: origin_backup/Dockerfile

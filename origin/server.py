@@ -66,7 +66,7 @@ class OriginServer(ops_pb2_grpc.FileServerServicer):
          """
          filename = self._save_chunks_to_file(request_iterator)
          # Send the file to the backup server
-         with grpc.insecure_channel(f'localhost:{BACKUP_PORT}') as channel:
+         with grpc.insecure_channel(f'origin_backup1:{BACKUP_PORT}') as channel:
              stub = ops_pb2_grpc.FileServerStub(channel)
              stub.put(self._get_file_chunks(filename))
 

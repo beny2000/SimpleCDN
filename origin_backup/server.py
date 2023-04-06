@@ -7,7 +7,7 @@ import ops_pb2
 import ops_pb2_grpc
 
 BACKUP_PORT = os.environ.get('BACKUP_PORT', 8002)
-BACKUP_STORAGE_DIR = os.environ.get('BACKUP_STORAGE_DIR', 'backup_files/')
+BACKUP_STORAGE_DIR = os.environ.get('STORAGE_DIR', 'files/')
 CHUNK_SIZE = 1024 * 1024  # 1MB
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s',
