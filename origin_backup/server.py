@@ -80,6 +80,16 @@ class BackupServer(ops_pb2_grpc.FileServerServicer):
             logging.info(f"Served file {request.name}")
             return self._get_file_chunks(request.name)
 
+    def heartbeat(self, request, context):
+        """
+        Handles heartbeat requests from other servers or clients.
+
+        :param request: The request object that was sent from the client
+        :param context: The context is a value passed in by the server and contains RPC-specific information
+        :return: A heartbeat response object
+        """
+        logging.info(f"Received heartbeat: {request.message}")
+        return ops_pb2.HeartbeatResponse(message="acknowledged")
 
 def run_backup_server():
     backup_server = grpc.server(futures.ThreadPoolExecutor(max_workers=5))
