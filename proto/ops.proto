@@ -19,3 +19,11 @@ message Request {
 message Reply {
   int32 length = 1;
 }
+
+message HeartbeatRequest {
+    string message = 1;
+}
+
+message HeartbeatResponse {
+    string message = 1;
+}
