@@ -29,15 +29,22 @@ services:
     environment:
         PORT: ${BALANCER_PORT}
         NUM_AREAS: 3
-        AREA1_PROXIES: ${PROXY1_PORT},${PROXY2_PORT}
-        AREA2_PROXIES: ${PROXY3_PORT},${PROXY4_PORT}
-        AREA3_PROXIES: ${PROXY5_PORT},${PROXY6_PORT}
+        AREA0_PROXIES: ${PROXY1_PORT},${PROXY2_PORT}
+        AREA1_PROXIES: ${PROXY3_PORT},${PROXY4_PORT}
+        AREA2_PROXIES: ${PROXY5_PORT},${PROXY6_PORT}
         DEFAULT_PATH: "test_file.html"
         FLASK_APP: "server.py"
+    depends_on:
+      - proxy0.0
+      - proxy0.1
+      - proxy1.0
+      - proxy1.1
+      - proxy2.0
+      - proxy2.1
     ports:
       - "${BALANCER_PORT}:${BALANCER_PORT}"
 
-  proxy1.1:
+  proxy0.0:
     build:
       context: .
       dockerfile: proxy/Dockerfile
@@ -52,11 +59,11 @@ services:
         BASE_LATENCY: 1
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
-        AREA: 1
+        AREA: 0
     ports:
       - "${PROXY1_PORT}:${PROXY1_PORT}"
 
-  proxy1.2:
+  proxy0.1:
     build:
       context: .
       dockerfile: proxy/Dockerfile
@@ -71,11 +78,11 @@ services:
         BASE_LATENCY: 1
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
-        AREA: 1
+        AREA: 0
     ports:
       - "${PROXY2_PORT}:${PROXY2_PORT}"
 
-  proxy2.1:
+  proxy1.0:
     build:
       context: .
       dockerfile: proxy/Dockerfile
@@ -90,11 +97,11 @@ services:
         BASE_LATENCY: 1
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
-        AREA: 2
+        AREA: 1
     ports:
       - "${PROXY3_PORT}:${PROXY3_PORT}"
 
-  proxy2.2:
+  proxy1.1:
     build:
       context: .
       dockerfile: proxy/Dockerfile
@@ -109,11 +116,11 @@ services:
         BASE_LATENCY: 1
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
-        AREA: 2
+        AREA: 1
     ports:
       - "${PROXY4_PORT}:${PROXY4_PORT}"
 
-  proxy3.1:
+  proxy2.0:
     build:
       context: .
       dockerfile: proxy/Dockerfile
@@ -128,11 +135,11 @@ services:
         BASE_LATENCY: 1
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
-        AREA: 3
+        AREA: 2
     ports:
       - "${PROXY5_PORT}:${PROXY5_PORT}"
 
-  proxy3.2:
+  proxy2.1:
     build:
       context: .
       dockerfile: proxy/Dockerfile
@@ -147,7 +154,7 @@ services:
         BASE_LATENCY: 1
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
-        AREA: 3
+        AREA: 2
     ports:
       - "${PROXY6_PORT}:${PROXY6_PORT}"
   

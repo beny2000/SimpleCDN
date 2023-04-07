@@ -17,6 +17,7 @@ BASE_LATENCY = float(os.environ.get("BASE_LATENCY", 1))
 IN_SCALE = float(os.environ.get("IN_SCALE", 1))
 OUT_SCALE = float(os.environ.get("OUT_SCALE", 1))
 TIME_FORMAT = '%Y-%m-%d-%H:%M:%S.%f'
+logging.getLogger('werkzeug').setLevel(logging.WARNING)
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s',
                     handlers=[logging.StreamHandler()])
