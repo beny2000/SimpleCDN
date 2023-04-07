@@ -6,8 +6,10 @@ from concurrent import futures
 import ops_pb2
 import ops_pb2_grpc
 
-PORT = os.environ.get('PORT', 8001)
-BACKUP_PORT = os.environ.get('BACKUP_PORT', 8002)
+PORT = os.environ.get('PORT')
+BACKUP_PORTS = [port for port in enumerate(os.environ.get('BACKUP_PORTS').split(","))]
+
+
 STORAGE_DIR = os.environ.get('STORAGE_DIR', 'files/')
 CHUNK_SIZE = 1024 * 1024  # 1MB
 logging.basicConfig(level=logging.DEBUG,
@@ -66,9 +68,11 @@ class OriginServer(ops_pb2_grpc.FileServerServicer):
          """
          filename = self._save_chunks_to_file(request_iterator)
          # Send the file to the backup server
-         with grpc.insecure_channel(f'origin_backup1:{BACKUP_PORT}') as channel:
-             stub = ops_pb2_grpc.FileServerStub(channel)
-             stub.put(self._get_file_chunks(filename))
+
+         for i in range(len(BACKUP_PORTS)):
+             with grpc.insecure_channel(f'origin_backup{i+1}:{BACKUP_PORTS[i]}') as channel:
+                 stub = ops_pb2_grpc.FileServerStub(channel)
+                 stub.put(self._get_file_chunks(filename))
 
          logging.info(f"Stored file {filename}")
          return ops_pb2.Reply(length=os.path.getsize(self.origin_files + filename))
