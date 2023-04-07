@@ -1,8 +1,10 @@
 import os
 import grpc
+import random
 import logging
 from datetime import datetime, timedelta
 from concurrent import futures
+from threading import Thread
 from flask import Flask
 
 import ops_pb2_grpc
@@ -11,6 +13,7 @@ import ops_pb2
 CHUNK_SIZE = 1024 * 1024  # 1MB
 PORT = os.environ.get("PORT", 5000)
 ORIGIN_PORT = os.environ.get("ORIGIN_PORT", 8001)
+ORIGIN_BACKUPS = [port for port in os.environ.get('ORIGIN_BACKUPS').split(",")]
 CACHE_DIR = os.environ.get("CACHE_DIR", "cache/")
 TTL = float(os.environ.get("TTL", 120))
 BASE_LATENCY = float(os.environ.get("BASE_LATENCY", 1))
@@ -147,6 +150,20 @@ class FileClient:
         self.storage.save_chunks_to_file(response, target_name)
         self.storage.set_TTL(target_name)
 
+liveliness = {f'origin_backup{i+1}:{ORIGIN_BACKUPS[i]}': False for i in range(len(ORIGIN_BACKUPS))}
+liveliness.update({f'origin:{ORIGIN_PORT}': False})
+
+def check_liveliness(liveliness):
+    while True:
+        for addr in liveliness.keys():
+            try:
+                with grpc.insecure_channel(addr) as channel:
+                    stub = ops_pb2_grpc.FileServerStub(channel)
+                    res = stub.heartbeat(ops_pb2.HeartbeatRequest(message="hello"))
+                    liveliness[addr] = True if res.message == 'acknowledged' else False
+            except Exception:
+                liveliness[addr] = False
+
     
 app = Flask(__name__)
 file_store = FileStore()
@@ -163,25 +180,39 @@ def heartbeat():
 @app.route('/<path:path>')
 def serve_GET(path):
     """
-    If the file is in the cache, return it, otherwise download it from the origin server and return it
+    Serves the requested file by checking if it is in the cache and returning it, otherwise
+    downloading it from the origin server or a live backup if the primary origin is dead.
     
     :param path: The path of the file to be served
-    :return: The file is being returned
+    :return: The file is being returned.
     """
     
     file = file_store.get(path)
 
     if file and not file_store.is_expired(path):
-        # Check if TTL has expried
         logging.info(f"Served file {path}. Request was a cache hit")
         return file
     
-    client.download(path) # if this fails to hit the primary origin then try a backup origin
+    # If primary origin is dead, request file from a live backup
+    if liveliness[f'origin:{ORIGIN_PORT}']:
+        client.download(path) 
+    else:
+        logging.warning(f"Primary Origin on port {ORIGIN_PORT} is dead")
+        backups = list(liveliness.keys())
+        random.shuffle(backups)
+        
+        for backup in backups:
+            if liveliness[backup]:
+                FileClient(backup, file_store).download(path)
+
     logging.info(f"Served file {path}. Request was a cache miss")
     return file_store.get(path)
 
 
 if __name__ == "__main__":
+    th = Thread(target=check_liveliness, args=(liveliness,))
+    th.start()
+
     app.run(debug=False, host="0.0.0.0", port=PORT)
 
 

@@ -88,6 +88,16 @@ class OriginServer(ops_pb2_grpc.FileServerServicer):
          if request.name:
             logging.info(f"Served file {request.name}")
             return self._get_file_chunks(request.name)
+      
+      def heartbeat(self, request, context):
+        """
+        Handles heartbeat requests from other servers or clients.
+
+        :param request: The request object that was sent from the client
+        :param context: The context is a value passed in by the server and contains RPC-specific information
+        :return: A heartbeat response object
+        """
+        return ops_pb2.HeartbeatResponse(message="acknowledged")
 
 def run_origin_server():
   server = grpc.server(futures.ThreadPoolExecutor(max_workers=5))

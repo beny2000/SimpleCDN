@@ -3,6 +3,7 @@ syntax = "proto3";
 service FileServer {
   rpc put(stream Chunk) returns (Reply) {}
   rpc get(Request) returns (stream Chunk) {}
+  rpc heartbeat(HeartbeatRequest) returns (HeartbeatResponse) {}
 }
 
 

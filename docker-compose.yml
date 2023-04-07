@@ -64,6 +64,7 @@ services:
     environment:
         PORT: ${PROXY1_PORT}
         ORIGIN_PORT: ${ORIGIN_PORT}
+        ORIGIN_BACKUPS: ${BACKUP1_PORT},${BACKUP2_PORT}
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
@@ -71,6 +72,10 @@ services:
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 0
+    depends_on:
+      - origin
+      - origin_backup1
+      - origin_backup2
     ports:
       - "${PROXY1_PORT}:${PROXY1_PORT}"
 
@@ -83,6 +88,7 @@ services:
     environment:
         PORT: ${PROXY2_PORT}
         ORIGIN_PORT: ${ORIGIN_PORT}
+        ORIGIN_BACKUPS: ${BACKUP1_PORT},${BACKUP2_PORT}
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
@@ -90,6 +96,10 @@ services:
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 0
+    depends_on:
+      - origin
+      - origin_backup1
+      - origin_backup2
     ports:
       - "${PROXY2_PORT}:${PROXY2_PORT}"
 
@@ -102,6 +112,7 @@ services:
     environment:
         PORT: ${PROXY3_PORT}
         ORIGIN_PORT: ${ORIGIN_PORT}
+        ORIGIN_BACKUPS: ${BACKUP1_PORT},${BACKUP2_PORT}
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
@@ -109,6 +120,10 @@ services:
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 1
+    depends_on:
+      - origin
+      - origin_backup1
+      - origin_backup2
     ports:
       - "${PROXY3_PORT}:${PROXY3_PORT}"
 
@@ -121,6 +136,7 @@ services:
     environment:
         PORT: ${PROXY4_PORT}
         ORIGIN_PORT: ${ORIGIN_PORT}
+        ORIGIN_BACKUPS: ${BACKUP1_PORT},${BACKUP2_PORT}
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
@@ -128,6 +144,10 @@ services:
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 1
+    depends_on:
+      - origin
+      - origin_backup1
+      - origin_backup2
     ports:
       - "${PROXY4_PORT}:${PROXY4_PORT}"
 
@@ -140,6 +160,7 @@ services:
     environment:
         PORT: ${PROXY5_PORT}
         ORIGIN_PORT: ${ORIGIN_PORT}
+        ORIGIN_BACKUPS: ${BACKUP1_PORT},${BACKUP2_PORT}
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
@@ -147,6 +168,10 @@ services:
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 2
+    depends_on:
+      - origin
+      - origin_backup1
+      - origin_backup2
     ports:
       - "${PROXY5_PORT}:${PROXY5_PORT}"
 
@@ -159,6 +184,7 @@ services:
     environment:
         PORT: ${PROXY6_PORT}
         ORIGIN_PORT: ${ORIGIN_PORT}
+        ORIGIN_BACKUPS: ${BACKUP1_PORT},${BACKUP2_PORT}
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
@@ -166,6 +192,10 @@ services:
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 2
+    depends_on:
+      - origin
+      - origin_backup1
+      - origin_backup2
     ports:
       - "${PROXY6_PORT}:${PROXY6_PORT}"
   
