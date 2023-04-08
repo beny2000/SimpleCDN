@@ -1,11 +1,12 @@
 import os
 import grpc
+import time
 import random
 import logging
 from datetime import datetime, timedelta
 from concurrent import futures
 from threading import Thread
-from flask import Flask
+from flask import Flask, request
 
 import ops_pb2_grpc
 import ops_pb2
@@ -20,12 +21,13 @@ BASE_LATENCY = float(os.environ.get("BASE_LATENCY", 1))
 IN_SCALE = float(os.environ.get("IN_SCALE", 1))
 OUT_SCALE = float(os.environ.get("OUT_SCALE", 1))
 TIME_FORMAT = '%Y-%m-%d-%H:%M:%S.%f'
+AREA = os.environ.get('AREA')
 logging.getLogger('werkzeug').setLevel(logging.WARNING)
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s %(levelname)s %(message)s',
                     handlers=[logging.StreamHandler()])
 
-def introduce_latency(self, request_area_id=None):
+def introduce_latency(request_area_id=None):
     """
     Introduces the latency based on the area and request area ID.
     
@@ -34,7 +36,7 @@ def introduce_latency(self, request_area_id=None):
     area
     :return: the calculated latency based on the input parameters.
     """
-    if self.area == request_area_id:
+    if AREA == request_area_id:
         latency = BASE_LATENCY * IN_SCALE
     else:
         latency = BASE_LATENCY * OUT_SCALE
@@ -186,7 +188,8 @@ def serve_GET(path):
     :param path: The path of the file to be served
     :return: The file is being returned.
     """
-    
+    time.sleep(introduce_latency(request.args.get("area")))
+
     file = file_store.get(path)
 
     if file and not file_store.is_expired(path):

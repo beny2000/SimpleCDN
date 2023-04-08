@@ -68,7 +68,7 @@ services:
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
-        BASE_LATENCY: 1
+        BASE_LATENCY: 5
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 0
@@ -92,7 +92,7 @@ services:
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
-        BASE_LATENCY: 1
+        BASE_LATENCY: 5
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 0
@@ -116,7 +116,7 @@ services:
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
-        BASE_LATENCY: 1
+        BASE_LATENCY: 5
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 1
@@ -140,7 +140,7 @@ services:
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
-        BASE_LATENCY: 1
+        BASE_LATENCY: 5
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 1
@@ -164,7 +164,7 @@ services:
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
-        BASE_LATENCY: 1
+        BASE_LATENCY: 5
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 2
@@ -188,7 +188,7 @@ services:
         FLASK_APP: "server.py"
         CACHE_DIR: "cache/"
         TTL: 120
-        BASE_LATENCY: 1
+        BASE_LATENCY: 5
         OUT_SCALE: 1.5
         IN_SCALE: 0.5
         AREA: 2

@@ -2,6 +2,7 @@ import grpc
 import os
 import logging
 from concurrent import futures
+import time
 
 import ops_pb2
 import ops_pb2_grpc
@@ -85,6 +86,7 @@ class OriginServer(ops_pb2_grpc.FileServerServicer):
          :param context: The context is a value passed in by the server and contains RPC-specific information
          :return: The file chunks
          """
+         time.sleep(2)
          if request.name:
             logging.info(f"Served file {request.name}")
             return self._get_file_chunks(request.name)

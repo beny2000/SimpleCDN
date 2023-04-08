@@ -93,6 +93,10 @@ def serve_main():
     :return: A redirect to the proxy with the default path.
     """
     server = get_server(request)
+    area_id = request.args.get("area")
+    if area_id:
+        return redirect(server + DEFAULT_PATH + f'?area={area_id}')
+
     return redirect(server + DEFAULT_PATH)
 
 
@@ -106,6 +110,10 @@ def serve_GET(path):
     """
 
     server = get_server(request)
+    area_id = request.args.get("area")
+    if area_id:
+        return redirect(server + path + f'?area={area_id}')
+    
     return redirect(server + path)
 
 
