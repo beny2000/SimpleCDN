@@ -21,7 +21,6 @@
 ![CDN Sequence Diagram](origin/files/cdn_diagram.png)
 
 - The proxy and origin server share a proto file that defines the messages
-  - https://github.com/gooooloo/grpc-file-transfer (example file transfer in grpc)
 
 - Extra Features
   - UI for uploading files to the origin server
